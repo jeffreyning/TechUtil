@@ -2,13 +2,15 @@ package com.github.jeffreyning.techutil;
 
 import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Method;
-import java.util.Locale;
+import java.util.*;
+import java.util.function.BiFunction;
+
 
 /**
  * @author ninghao
  */
 public class TechUtil {
-    private static<T> String pn(ParseFun<T, Object> parseFun) throws Exception {
+    public static<T> String pn(ParseFun<T, Object> parseFun) throws Exception {
         Method writeReplace = parseFun.getClass().getDeclaredMethod("writeReplace");
         writeReplace.setAccessible(true);
         Object sl = writeReplace.invoke(parseFun);
@@ -29,4 +31,47 @@ public class TechUtil {
         }
         return methodName;
     }
+    public static <T> void forEach(Iterable<? extends T> elements, BiFunction<Integer, ? super T, CMD> action) {
+        Objects.requireNonNull(elements);
+        Objects.requireNonNull(action);
+        int index = 0;
+        for (T element : elements) {
+            index++;
+            CMD cmd=action.apply(index-1, element);
+            if(cmd.isBreak()){
+                break;
+            }
+        }
+    }
+
+    public static <T> void forEach(Map<String, T> map, BiFunction<Integer, Map.Entry<String, T>, CMD> action) {
+        Objects.requireNonNull(map);
+        Objects.requireNonNull(action);
+        Iterable<Map.Entry<String,T>> elements=map.entrySet();
+        int index = 0;
+        for (Map.Entry<String, T> element : elements) {
+            index++;
+            CMD cmd=action.apply(index-1, element);
+            if(cmd.isBreak()){
+                break;
+            }
+        }
+    }
+
+    public static <T> void forEach(Object[] arr, BiFunction<Integer, ? super T, CMD> action) {
+        Objects.requireNonNull(arr);
+        Objects.requireNonNull(action);
+        List<T> list= (List<T>) Arrays.asList(arr);
+        Iterable<T> elements=list;
+        int index = 0;
+        for (T element : elements) {
+            index++;
+            CMD cmd=action.apply(index-1, element);
+            if(cmd.isBreak()){
+                break;
+            }
+        }
+    }
+
+
 }
